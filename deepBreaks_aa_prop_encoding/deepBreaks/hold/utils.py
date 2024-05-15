@@ -72,85 +72,23 @@ def get_scores(ana_type):
     return scores[ana_type]
 
 
-#def get_params():
-    #params = {
-        #'rf': {'rf__max_features': ["sqrt", "log2"]},
-        #'Adaboost': {'Adaboost__learning_rate': np.linspace(0.001, 0.1, num=2),
-        #             'Adaboost__n_estimators': [200, 400]},
-        #'gbc': {'gbc__max_depth': range(3, 10), #original is (3, 6)
-        #        'gbc__max_features': ['sqrt', 'log2'],
-        #        'gbc__n_estimators': [200, 300, 500, 800], #200,500,800 original
-        #        'gbc__learning_rate': np.linspace(0.001, 0.1, num=2)},
-        #'et': {'et__max_depth': [4, 6, 8, 10, 12, 20],
-        #       'et__n_estimators': [500, 1000]},
-        #'dt': {'dt__max_depth': [4, 6, 8]},
-        #'Lasso': {'Lasso__alpha': np.linspace(0.01, 100, num=5)},
-        #'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)}
-    #}
-    #return params
-
 def get_params():
     params = {
-        'rf': {
-            'rf__max_features': ["sqrt", "log2", None],  # Consider not limiting features
-            'rf__n_estimators': [100, 200, 500],  # Vary number of trees
-            'rf__max_depth': [None, 10, 20, 30],  # Control tree depth
-            'rf__min_samples_split': [2, 5, 10],  # Minimum samples for split
-            'rf__min_samples_leaf': [1, 2, 4],  # Minimum samples per leaf
-            'rf__bootstrap': [True, False],  # Use bootstrapping or not
-        },
-        'Adaboost': {
-            'Adaboost__learning_rate': [0.01, 0.1, 1.0],  # Broader range
-            'Adaboost__n_estimators': [50, 100, 200],  # More granular
-        },
-        'gbc': {
-            'gbc__max_depth': [3, 5, 7, 9, 10, None],  # Try unlimited depth
-            'gbc__max_features': ["sqrt", "log2", None],  # More flexibility
-            'gbc__n_estimators': [200, 300, 500, 800],  # Reasonable range
-            'gbc__learning_rate': [0.01, 0.1, 0.2],  # Common values
-            'gbc__subsample': [0.8, 1.0],  # Consider subsampling 
-        },
-        'et': {
-            'et__max_depth': [None, 10, 20, 30],  # More flexibility
-            'et__n_estimators': [100, 200, 300],
-            'et__min_samples_split': [2, 5, 10],
-            'et__min_samples_leaf': [1, 2, 4],
-        },
-        'dt': {
-            'dt__max_depth': [None, 5, 10, 15, 20], # More options for max_depth
-            'dt__min_samples_split': [2, 5, 10],
-            'dt__min_samples_leaf': [1, 2, 4],
-        },
-        'Lasso': {
-            'Lasso__alpha': [0.001, 0.01, 0.1, 1, 10, 100]  # Wider logarithmic range
-        },
-        'LassoLars': {  # Might not be necessary to tune if similar to Lasso
-            'LassoLars__alpha': [0.001, 0.01, 0.1, 1, 10, 100]  # Wider logarithmic range
-        },
-        'lgbm': {
-            'lgbm__num_leaves': [31, 63, 127],        # Controls tree complexity
-            'lgbm__learning_rate': [0.01, 0.1, 0.2], 
-            'lgbm__n_estimators': [100, 200, 300],
-            'lgbm__max_depth': [-1, 5, 10],           # -1 means no limit
-            'lgbm__subsample': [0.8, 1.0],
-            'lgbm__colsample_bytree': [0.8, 1.0],     # Feature subsampling
-            'lgbm__reg_alpha': [0, 0.1, 1.0],        # L1 regularization
-            'lgbm__reg_lambda': [0, 0.1, 1.0],       # L2 regularization
-        },
-
-        # --- NEW: XGBoost ---
-        'xgb': {
-            'xgb__max_depth': [3, 5, 7],
-            'xgb__learning_rate': [0.01, 0.1, 0.2],
-            'xgb__n_estimators': [100, 200, 300],
-            'xgb__subsample': [0.8, 1.0],
-            'xgb__colsample_bytree': [0.8, 1.0],
-            'xgb__reg_alpha': [0, 0.1, 1.0],
-            'xgb__reg_lambda': [0, 0.1, 1.0],
-            'xgb__gamma': [0, 0.1, 1.0]              # Minimum loss reduction for split
-        }
+        'rf': {'rf__max_features': ["sqrt", "log2"]},
+        'Adaboost': {'Adaboost__learning_rate': np.linspace(0.001, 0.1, num=2),
+                     'Adaboost__n_estimators': [200, 400]},
+        'gbc': {'gbc__max_depth': range(3, 10), #original is (3, 6)
+                'gbc__max_features': ['sqrt', 'log2'],
+                'gbc__n_estimators': [200, 300, 500, 800], #200,500,800 original
+                'gbc__learning_rate': np.linspace(0.001, 0.1, num=2)},
+        'et': {'et__max_depth': [4, 6, 8, 10, 12, 20],
+               'et__n_estimators': [500, 1000]},
+        'dt': {'dt__max_depth': [4, 6, 8]},
+        'Lasso': {'Lasso__alpha': np.linspace(0.01, 100, num=5)},
+        'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)}
     }
     return params
+
 
 def get_color_palette(char_list):
     """
