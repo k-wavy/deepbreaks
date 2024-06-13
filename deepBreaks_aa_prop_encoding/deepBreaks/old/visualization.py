@@ -168,8 +168,7 @@ def dp_aa_prop_plot(importance, imp_col, model_name,
             title_fontsize=10, xlab_fontsize=8, ylab_fontsize=8,
             xtick_fontsize=6, ytick_fontsize=6,
             annotate=1,
-            report_dir='.',
-            props_to_keep = ['H1', 'H3', 'P1', 'NCI', 'MASS']):
+            report_dir='.'):
     
     import matplotlib.pyplot as plt
     """
@@ -203,24 +202,7 @@ def dp_aa_prop_plot(importance, imp_col, model_name,
     """
     pl_title = "Important Positions - " + model_name
 
-    aa_prop_color_dict: { 
-        {'H1':'#d5283a'},
-        {'H2':'#f44d25'},
-        {'H3':'#fd9136'},
-        {'V':'#fece58'},
-        {'P1':'#d0f55c'},
-        {'P2':'#80daa9'},
-        {'SASA':'#33c290'},
-        {'NCI':'#1574b5'},
-        {'MASS':'#9F2B68'}
-    }
-    if props_to_keep == 'all' or props_to_keep == 'All':
-        color_list = ['#d5283a', '#f44d25', '#fd9136', '#fece58','#d0f55c', '#80daa9', '#33c290', '#1574b5', '#9F2B68']
-        aa_prop_list = ['H1','H2','H3','V','P1','P2','SASA','NCI','MASS']
-    else:
-        color_list = [aa_prop_color_dict[prop] for prop in props_to_keep if prop in aa_prop_color_dict]
-        aa_prop_list = props_to_keep
-
+    aa_prop_list = ['H1','H2','H3','V','P1','P2','SASA','NCI','MASS']
     num_props = len(aa_prop_list)
 
     if type(importance) is dict:
@@ -253,6 +235,7 @@ def dp_aa_prop_plot(importance, imp_col, model_name,
     
     
     fig, ax = plt.subplots(figsize=(7.2, 4), dpi=300)
+    color_list = ['#d5283a', '#f44d25', '#fd9136', '#fece58','#d0f55c', '#80daa9', '#33c290', '#1574b5', '#9F2B68']
     # Iterate over each subplot and plot vlines for each property column
     for i in range(num_props):
         property_col = aa_prop_list[i]
@@ -275,22 +258,20 @@ def dp_aa_prop_plot(importance, imp_col, model_name,
         pickle.dump(fig, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
     
-    figs, axes = plt.subplots(num_props, figsize=(5, 2*num_props), dpi=300, sharex=True, sharey=True)
+    figs, axes = plt.subplots(num_props, figsize=(5, 20), dpi=300, sharex=True, sharey=True)
     # Iterate over each subplot and plot vlines for each property column
     for i, ax in enumerate(axes.flatten()):
         property_col = aa_prop_list[i]
         ax.vlines(x=num_index_list, ymin=0, ymax=sep_aa_imp[property_col],
                 color=color_list[i], linewidth=.7, alpha=0.8)
         ax.set_title(property_col)
-        ax.grid(False)
-        ax.tick_params(axis='x', which='both', labelbottom=True)  # Show x ticks
-
+        ax.grid(True, linewidth=.1)
 
     # Set common x and y labels
-    figs.text(0.525, 0, 'Position', ha='center')
+    figs.text(0.5, 0, 'Position', ha='center')
     figs.text(0, 0.5, 'Importance', va='center', rotation='vertical')
-    figs.tight_layout()  # Adjust layout to prevent overlap
-    #plt.tight_layout()
+
+    plt.tight_layout()
     plt.savefig(str(report_dir + '/' + str(model_name) + '_sep_props_' + str(dpi) + '.pdf'), bbox_inches='tight')
     
     with open(str(report_dir + '/' + model_name + '_sep_props_' + str(dpi) + '.pickle'), 'wb') as handle:
