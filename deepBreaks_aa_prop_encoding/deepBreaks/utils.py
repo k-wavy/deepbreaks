@@ -16,12 +16,18 @@ def get_models(ana_type):
         from sklearn.linear_model import LinearRegression, Lasso, BayesianRidge, HuberRegressor, LassoLars
         from xgboost import XGBRegressor
         from lightgbm import LGBMRegressor
+        from sklearn.kernel_ridge import KernelRidge
+        from sklearn.gaussian_process import GaussianProcessRegressor
+        from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
+        from catboost import CatBoostRegressor
 
+        kernel = C(1.0, (1e-3, 1e3)) * RBF(10, (1e-2, 1e2))  # Example kernel
+        
         models = {
             'rf': RandomForestRegressor(n_jobs=-1, random_state=123),
             'Adaboost': AdaBoostRegressor(random_state=123),
             'et': ExtraTreesRegressor(n_jobs=-1, random_state=123),
-            'gbc': GradientBoostingRegressor(random_state=123),
+            'gbr': GradientBoostingRegressor(random_state=123),
             'dt': DecisionTreeRegressor(random_state=123),
             'lr': LinearRegression(n_jobs=-1),
             'Lasso': Lasso(random_state=123),
@@ -29,7 +35,9 @@ def get_models(ana_type):
             'BayesianRidge': BayesianRidge(),
             'HubR': HuberRegressor(max_iter=2000, tol=1e-4),
             'lgbm': LGBMRegressor(n_jobs=-1, random_state=123),
-            'xgb': XGBRegressor(n_jobs=-1, random_state=123)
+            'xgb': XGBRegressor(n_jobs=-1, random_state=123),
+            #'krr': KernelRidge(),
+            #'catboost': CatBoostRegressor(random_seed=123, iterations = 1000, learning_rate=0.1, depth = 10)
 
         }
     else:
@@ -71,25 +79,93 @@ def get_scores(ana_type):
               }
     return scores[ana_type]
 
-
-#def get_params():
-    #params = {
-        #'rf': {'rf__max_features': ["sqrt", "log2"]},
-        #'Adaboost': {'Adaboost__learning_rate': np.linspace(0.001, 0.1, num=2),
-        #             'Adaboost__n_estimators': [200, 400]},
-        #'gbc': {'gbc__max_depth': range(3, 10), #original is (3, 6)
-        #        'gbc__max_features': ['sqrt', 'log2'],
-        #        'gbc__n_estimators': [200, 300, 500, 800], #200,500,800 original
-        #        'gbc__learning_rate': np.linspace(0.001, 0.1, num=2)},
-        #'et': {'et__max_depth': [4, 6, 8, 10, 12, 20],
-        #       'et__n_estimators': [500, 1000]},
-        #'dt': {'dt__max_depth': [4, 6, 8]},
-        #'Lasso': {'Lasso__alpha': np.linspace(0.01, 100, num=5)},
-        #'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)}
-    #}
-    #return params
+def get_simp_params():
+    params = {
+        # --- NEW: BayesianRidge ---
+        'BayesianRidge': {
+            'BayesianRidge__compute_score': [True, False], # Whether to compute the log marginal likelihood
+            'BayesianRidge__fit_intercept': [True, False], # Whether to fit an intercept
+            'BayesianRidge__n_iter': [100,300,500]
+        },
+        'rf': {
+            'rf__max_features': ["sqrt", "log2", None],  # Consider not limiting features
+            'rf__n_estimators': [100, 200, 500],  # Vary number of trees
+            'rf__max_depth': [None, 10, 20, 30],  # Control tree depth
+            'rf__bootstrap': [True, False],  # Use bootstrapping or not
+        },
+        'Adaboost': {'Adaboost__learning_rate': np.linspace(0.001, 0.1, num=2),
+                     'Adaboost__n_estimators': [200, 400]},
+        #'gbr': {'gbr__max_depth': range(3, 6), #original is (3, 6)
+        #        'gbr__max_features': ['sqrt', 'log2', None],
+        #        'gbr__n_estimators': [200, 300, 500], #200,500,800 original
+        #        'gbr__learning_rate': [0.001,0.01,0.1]},
+        'et': {'et__max_depth': [4, 6, 8, 10, 12, 20],
+               'et__n_estimators': [500, 1000]},
+        'dt': {'dt__max_depth': [4, 6, 8]},
+        'Lasso': {'Lasso__alpha': np.linspace(0.01, 100, num=5)},
+        'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)},
+        'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)},
+        #'xgb': {
+        #    'xgb__max_depth': [3, 5, 7],
+        #    'xgb__learning_rate': [0.01, 0.1, 0.2],
+        #    'xgb__n_estimators': [100, 200, 300],
+         # Minimum loss reduction for split
+        #},
+    }
+    return params
 
 def get_params():
+    params = {
+                # --- NEW: BayesianRidge ---
+        'BayesianRidge': {
+            'BayesianRidge__alpha_1': [1e-6, 1e-4, 1e-2],  # Prior for alpha
+            'BayesianRidge__alpha_2': [1e-6, 1e-4, 1e-2],  # Prior for alpha
+            'BayesianRidge__lambda_1': [1e-6, 1e-4, 1e-2], # Prior for lambda
+            'BayesianRidge__lambda_2': [1e-6, 1e-4, 1e-2], # Prior for lambda
+            'BayesianRidge__compute_score': [True, False], # Whether to compute the log marginal likelihood
+            'BayesianRidge__fit_intercept': [True, False], # Whether to fit an intercept
+            'BayesianRidge__n_iter': [100,300,500]
+        },
+        'rf': {
+            'rf__max_features': ["sqrt", "log2", None],  # Consider not limiting features
+            'rf__n_estimators': [100, 200, 500],  # Vary number of trees
+            'rf__max_depth': [None, 10, 20, 30],  # Control tree depth
+            'rf__min_samples_split': [2, 5, 10],  # Minimum samples for split
+            'rf__min_samples_leaf': [1, 2, 4],  # Minimum samples per leaf
+            'rf__bootstrap': [True, False],  # Use bootstrapping or not
+        },
+        'Adaboost': {'Adaboost__learning_rate': np.linspace(0.001, 0.1, num=2),
+                     'Adaboost__n_estimators': [200, 400]},
+        'gbc': {'gbc__max_depth': range(3, 10), #original is (3, 6)
+                'gbc__max_features': ['sqrt', 'log2', None],
+                'gbc__n_estimators': [200, 300, 500, 800], #200,500,800 original
+                'gbc__learning_rate': [0.001,0.01,0.1,0.2]},
+        'et': {'et__max_depth': [4, 6, 8, 10, 12, 20],
+               'et__n_estimators': [500, 1000]},
+        'dt': {'dt__max_depth': [4, 6, 8]},
+        'Lasso': {'Lasso__alpha': np.linspace(0.01, 100, num=5)},
+        'LassoLars': {'LassoLars__alpha': np.linspace(0.01, 100, num=5)},
+        'lgbm': {
+            'lgbm__num_leaves': [31, 63, 127],        # Controls tree complexity
+            'lgbm__learning_rate': [0.01, 0.1, 0.2], 
+            'lgbm__n_estimators': [100, 200, 300],
+            'lgbm__max_depth': [-1, 5, 10],           # -1 means no limit
+            'lgbm__reg_alpha': [0, 0.1, 1.0],        # L1 regularization
+            'lgbm__reg_lambda': [0, 0.1, 1.0],       # L2 regularization
+        },
+        # --- NEW: XGBoost ---
+        'xgb': {
+            'xgb__max_depth': [3, 5, 7],
+            'xgb__learning_rate': [0.01, 0.1, 0.2],
+            'xgb__n_estimators': [100, 200, 300],
+            'xgb__reg_alpha': [0, 0.1, 1.0],
+            'xgb__reg_lambda': [0, 0.1, 1.0],
+            'xgb__gamma': [0, 0.1, 1.0]              # Minimum loss reduction for split
+        },
+    }
+    return params
+
+def get_exp_params():
     params = {
         'rf': {
             'rf__max_features': ["sqrt", "log2", None],  # Consider not limiting features
@@ -104,11 +180,11 @@ def get_params():
             'Adaboost__n_estimators': [50, 100, 200],  # More granular
         },
         'gbc': {
-            'gbc__max_depth': [3, 5, 7, 9, 10, None],  # Try unlimited depth
-            'gbc__max_features': ["sqrt", "log2", None],  # More flexibility
+            'gbc__max_depth': [3, 5, 7, 9, 10, 20, None],  # Try unlimited depth
+            'gbc__max_features': ["sqrt", "log2", "Auto", None],  # More flexibility
             'gbc__n_estimators': [200, 300, 500, 800],  # Reasonable range
-            'gbc__learning_rate': [0.01, 0.1, 0.2],  # Common values
-            'gbc__subsample': [0.8, 1.0],  # Consider subsampling 
+            'gbc__learning_rate': [0.001, 0.01, 0.1, 0.2],  # Common values
+            #'gbc__subsample': [0.8, 1.0],  # Consider subsampling 
         },
         'et': {
             'et__max_depth': [None, 10, 20, 30],  # More flexibility
@@ -137,7 +213,6 @@ def get_params():
             'lgbm__reg_alpha': [0, 0.1, 1.0],        # L1 regularization
             'lgbm__reg_lambda': [0, 0.1, 1.0],       # L2 regularization
         },
-
         # --- NEW: XGBoost ---
         'xgb': {
             'xgb__max_depth': [3, 5, 7],
@@ -148,7 +223,16 @@ def get_params():
             'xgb__reg_alpha': [0, 0.1, 1.0],
             'xgb__reg_lambda': [0, 0.1, 1.0],
             'xgb__gamma': [0, 0.1, 1.0]              # Minimum loss reduction for split
-        }
+        },
+        # --- NEW: BayesianRidge ---
+        'BayesianRidge': {
+            'BayesianRidge__alpha_1': [1e-6, 1e-4, 1e-2],  # Prior for alpha
+            'BayesianRidge__alpha_2': [1e-6, 1e-4, 1e-2],  # Prior for alpha
+            'BayesianRidge__lambda_1': [1e-6, 1e-4, 1e-2], # Prior for lambda
+            'BayesianRidge__lambda_2': [1e-6, 1e-4, 1e-2], # Prior for lambda
+            'BayesianRidge__compute_score': [True, False], # Whether to compute the log marginal likelihood
+            'BayesianRidge__fit_intercept': [True, False] # Whether to fit an intercept
+        },
     }
     return params
 

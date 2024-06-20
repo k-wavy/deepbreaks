@@ -203,16 +203,16 @@ def dp_aa_prop_plot(importance, imp_col, model_name,
     """
     pl_title = "Important Positions - " + model_name
 
-    aa_prop_color_dict: { 
-        {'H1':'#d5283a'},
-        {'H2':'#f44d25'},
-        {'H3':'#fd9136'},
-        {'V':'#fece58'},
-        {'P1':'#d0f55c'},
-        {'P2':'#80daa9'},
-        {'SASA':'#33c290'},
-        {'NCI':'#1574b5'},
-        {'MASS':'#9F2B68'}
+    aa_prop_color_dict = { 
+        'H1':'#d5283a',
+        'H2':'#f44d25',
+        'H3':'#fd9136',
+        'V':'#fece58',
+        'P1':'#d0f55c',
+        'P2':'#80daa9',
+        'SASA':'#33c290',
+        'NCI':'#1574b5',
+        'MASS':'#9F2B68'
     }
     if props_to_keep == 'all' or props_to_keep == 'All':
         color_list = ['#d5283a', '#f44d25', '#fd9136', '#fece58','#d0f55c', '#80daa9', '#33c290', '#1574b5', '#9F2B68']
@@ -275,26 +275,27 @@ def dp_aa_prop_plot(importance, imp_col, model_name,
         pickle.dump(fig, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
     
-    figs, axes = plt.subplots(num_props, figsize=(5, 2*num_props), dpi=300, sharex=True, sharey=True)
-    # Iterate over each subplot and plot vlines for each property column
-    for i, ax in enumerate(axes.flatten()):
-        property_col = aa_prop_list[i]
-        ax.vlines(x=num_index_list, ymin=0, ymax=sep_aa_imp[property_col],
-                color=color_list[i], linewidth=.7, alpha=0.8)
-        ax.set_title(property_col)
-        ax.grid(False)
-        ax.tick_params(axis='x', which='both', labelbottom=True)  # Show x ticks
+    if len(aa_prop_list) > 1:
+        figs, axes = plt.subplots(num_props, figsize=(5, 2*num_props), dpi=300, sharex=True, sharey=True)
+        # Iterate over each subplot and plot vlines for each property column
+        for i, ax in enumerate(axes.flatten()):
+            property_col = aa_prop_list[i]
+            ax.vlines(x=num_index_list, ymin=0, ymax=sep_aa_imp[property_col],
+                    color=color_list[i], linewidth=.7, alpha=0.8)
+            ax.set_title(property_col)
+            ax.grid(False)
+            ax.tick_params(axis='x', which='both', labelbottom=True)  # Show x ticks
 
 
-    # Set common x and y labels
-    figs.text(0.525, 0, 'Position', ha='center')
-    figs.text(0, 0.5, 'Importance', va='center', rotation='vertical')
-    figs.tight_layout()  # Adjust layout to prevent overlap
-    #plt.tight_layout()
-    plt.savefig(str(report_dir + '/' + str(model_name) + '_sep_props_' + str(dpi) + '.pdf'), bbox_inches='tight')
-    
-    with open(str(report_dir + '/' + model_name + '_sep_props_' + str(dpi) + '.pickle'), 'wb') as handle:
-        pickle.dump(fig, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # Set common x and y labels
+        figs.text(0.525, 0, 'Position', ha='center')
+        figs.text(0, 0.5, 'Importance', va='center', rotation='vertical')
+        figs.tight_layout()  # Adjust layout to prevent overlap
+        #plt.tight_layout()
+        plt.savefig(str(report_dir + '/' + str(model_name) + '_sep_props_' + str(dpi) + '.pdf'), bbox_inches='tight')
+        
+        with open(str(report_dir + '/' + model_name + '_sep_props_' + str(dpi) + '.pickle'), 'wb') as handle:
+            pickle.dump(fig, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
     return print(str(model_name) + ' Done')
 
